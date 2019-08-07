@@ -6,3 +6,16 @@ PrivateNS Document WHMCS Module v3.0
 4. Activate PrivateNS Document
 5. Insert Client ID, Secret ID and you API URL (Reseller Custom Domain)
 6. Save Changes
+7. Put this code somewhere in your /templates/yourtemplatename/clientareadomaindetails.tpl
+<div class="row">
+    <div class="col-sm-offset-1 col-sm-5">
+        <a href="http://customdomainanda.com/index.php?m=mod_idcard" class="btn btn-info" role="button">Document Domain</a>
+    </div>
+</div>
+
+    after thisline code:
+<div class="row">
+    <div class="col-sm-offset-1 col-sm-5">
+        <h4><strong>{$LANG.clientareastatus}:</strong></h4> {$status}
+    </div>
+</div>
