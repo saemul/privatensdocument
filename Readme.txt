@@ -4,7 +4,7 @@ PrivateNS Document WHMCS Module v3.0
 2. Extract zip
 3. Open WHMCS Admin Page -> Setup -> Addon Modules
 4. Activate PrivateNS Document
-5. Insert Client ID, Secret ID and you API URL (Reseller Custom Domain)
+5. Insert Client ID, Secret ID and you Reseller URL that you can get from https://developer.irsfa.id, for API Documentation please read here: https://developer.irsfa.id/documentation/ 
 6. Save Changes
 7. Put this code somewhere in your /templates/yourtemplatename/clientareadomaindetails.tpl
 <div class="row">
