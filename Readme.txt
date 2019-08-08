@@ -9,7 +9,7 @@ PrivateNS Document WHMCS Module v3.0
 7. Put this code somewhere in your /templates/yourtemplatename/clientareadomaindetails.tpl
 <div class="row">
     <div class="col-sm-offset-1 col-sm-5">
-        <a href="http://customdomainanda.com/index.php?m=privatensdocument" class="btn btn-info" role="button">Document Domain</a>
+        <h4><strong>Document Domain:</strong></h4><a href="http://customdomainanda.com/index.php?m=privatensdocument" class="btn btn-info" role="button">Document Domain</a>
     </div>
 </div>
 
