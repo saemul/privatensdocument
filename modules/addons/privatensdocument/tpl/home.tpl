@@ -1,3 +1,10 @@
+{php}
+    $str=rand(); 
+    $result = sha1($str);
+    $csrftoken = $result;
+    $_SESSION['csrftoken'] = $csrftoken;
+    $id = $_SESSION['uid'];
+{/php}
 <style>
     img{
         display: block;
@@ -10,7 +17,7 @@
         overflow-y: scroll;
     }
 </style>
-<link rel="stylesheet" href="https://portal.qwords.com/assets/css/dropzone.css">
+<link rel="stylesheet" href="./assets/css/dropzone.css">
 <div class="container-fluid">
     <ul class="nav nav-tabs">
       <li role="presentation" class="active"><a href="./index.php?m=privatensdocument">Upload Document</a></li>
@@ -54,7 +61,6 @@
             	            <div class="panel-footer">
             	                <div class="btn-group btn-group-justified">
             	                    <a class='remove btn btn-danger' href="./index.php?m=privatensdocument&page=remove&file={$row->file}"> Delete</a>
-            	                     
             	                </div>
             	            </div>
             	        </div>
@@ -184,7 +190,9 @@ $(function(){
 
 $('#select_domain').change(function(){
     var domain = $(this).val();
-    var url = './modules/addons/privatensdocument/req.php?do=lookup_tld&domain='+domain;
+    var token = '{php} echo $csrftoken; {/php}'
+    var id = '{php} echo $id; {/php}'
+    var url = './modules/addons/privatensdocument/req.php?do=lookup_tld&domain='+domain+'&token='+token+'&id='+id;
     $.get(url,function(data){
        var obj = JSON.parse(data);
        $.each(obj,function(i,v){

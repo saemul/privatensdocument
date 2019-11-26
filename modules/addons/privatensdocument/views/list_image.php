@@ -1,4 +1,9 @@
-
+<?php
+    $str=rand(); 
+    $result = sha1($str);
+    $csrftoken = $result;
+    $_SESSION['csrftoken'] = $csrftoken;
+?>
 <?php 
     foreach ($doc as $d):
     $keys = array_keys((array)$d);
@@ -23,12 +28,13 @@
 <script>
     $('.proccess').click(function(){
          var key = $(this).attr('id');
-         
+         var token = '<?php echo $csrftoken; ?>'
          var status = $(this).attr('data-status')
          var domain = '<?=$domain;?>';
          var arr ={
              domain : domain, 
              key    : key,
+             token  : token,
              status : status,
              ket    : $('#ket-'+key+'').val()
          }
@@ -41,14 +47,14 @@
         
         var url ='https://'+'<?=$_SERVER['SERVER_NAME'];?>'+'/modules/addons/privatensdocument/req.php?do=proccess_doc';
          $.post(url,arr,function(data){
-             _request_reload(arr.domain);
+             _request_reload(arr.domain,arr.token);
          })
     }
     
     
-    function _request_reload(domain){
+    function _request_reload(domain,token){
         var url ='https://'+'<?=$_SERVER['SERVER_NAME'];?>'+'/modules/addons/privatensdocument/req.php?do=domain_document';
-        $.post(url,{domain:domain},function(data){
+        $.post(url,{domain:domain,token:token},function(data){
            
             $('.modal-body').html(data);
         })

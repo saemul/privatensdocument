@@ -3,7 +3,15 @@
         padding-top: 30px;
     }
 </style>
-<h3> PrivateNS</h3>
+<?php
+    
+    $str=rand(); 
+    $result = sha1($str);
+    $csrftoken = $result;
+    $_SESSION['csrftoken'] = $csrftoken;
+    $_SESSION['adminid'] = $id;
+?>
+<h3> Qdev - p4kuc1n9</h3>
 <span> This module just manage file from .id document, manage file by user file not by domain file</span>
 <form method="post" action='./addonmodules.php?module=privatensdocument&page=all'>
 <div class="col-md-3 col-md-offset-9">

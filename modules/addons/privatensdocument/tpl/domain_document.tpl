@@ -1,3 +1,10 @@
+{php}
+    $str=rand(); 
+    $result = sha1($str);
+    $csrftoken = $result;
+    $_SESSION['csrftoken'] = $csrftoken;
+    $id = $_SESSION['uid'];
+{/php}
 <style>
     img{
         display: block;
@@ -97,9 +104,11 @@
      // detail document 
     $('.detail').click(function(){
         var domain = $(this).attr('data-domain')
+        var token = '{php} echo $_SESSION['csrftoken']; {/php}'
+        var id = '{php} echo $id; {/php}'
         $('#domain_name').html(domain) 
         
-        var url = './modules/addons/privatensdocument/req.php?do=domain_detail&domain='+domain+'';
+        var url = './modules/addons/privatensdocument/req.php?do=domain_detail&domain='+domain+'&token='+token+'&id='+id;
         
         $.get(url,function(data){
             $('#detail_document').html("")

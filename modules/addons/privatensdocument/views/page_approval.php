@@ -56,8 +56,9 @@
     // get preview
     $('.btn-success').click(function(){
         var domain = $(this).attr('data-id');
+        var token = '<?php echo $_SESSION['csrftoken']; ?>'
         var url ='https://'+'<?=$_SERVER['SERVER_NAME'];?>'+'/modules/addons/privatensdocument/req.php?do=domain_document';
-        $.post(url,{domain:domain},function(data){
+        $.post(url,{domain:domain,token:token},function(data){
             $('#domain_name').html(domain)
             $('.modal-body').html(data);
         })

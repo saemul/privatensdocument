@@ -1,17 +1,17 @@
-<?php 
-/**
- * Class Generate Ass helper for the main function
- */
-    require_once __DIR__ . '/../../../init.php';
-    require 'email/src/Exception.php';
-    require 'email/src//PHPMailer.php';
-    require 'email/src//SMTP.php';
-    use PHPMailer\PHPMailer\PHPMailer;
-    use PHPMailer\PHPMailer\Exception;
-    global $CONFIG;
+<?php
+
+require_once __DIR__ . '/../../../init.php';
+require 'email/src/Exception.php';
+require 'email/src//PHPMailer.php';
+require 'email/src//SMTP.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+global $CONFIG;
 
 class Moid
 {
+    
+     
     private static  $dir = __DIR__ .'/files/';
     protected $dir_read ;
     function __construct()
@@ -24,7 +24,7 @@ class Moid
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => $url."/oauth/token",
+        CURLOPT_URL => $url."/oauth/token"
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,
@@ -184,11 +184,7 @@ class Moid
 			}			
 			return $tld=implode('.', $path_tld);
 	}
-    public function query($sql)
-    {
-        $query = mysql_query($sql);
-        return $query;
-    }
+   
     public function display_admin($vars)
     {
        include 'views/head.php';
@@ -219,7 +215,7 @@ class Moid
                                         WHERE syarat LIKE '%:"0"%' or syarat LIKE '%:0%'
 SQL;
 
-        $data_approval = $this->query($sql);
+        $data_approval = mysql_query($sql);
         if($data_approval!=null){
             foreach($data_approval as $row){
                $syarat = $this->_recover_file($row);
@@ -249,8 +245,8 @@ SQL;
         // Update file jia dia memiliki set untuk semua dan atau dia memiliki record lebih dari 1
         $idwhmcs= $var['idwhmcs'];
         $sql = "SELECT * from mod_box where idwhmcs ='$idwhmcs'";
-        $query = $this->query($sql);
-        $records = $query->fetchObject();
+        $query = mysql_query($sql);
+        $records = mysql_fetch_object($query);
         $file_type = ($records->type=='image/jpeg') ? 'ktp':  $records->type;
         $data=array(
            $file_type=>array(
@@ -262,7 +258,7 @@ SQL;
         $updater=json_encode($data);
         $domain = $var['domain'];
         $update = "update privatensdocument set syarat = '$updater' where domain ='$domain'";
-        return $this->query($update);
+        return mysql_query($update);
     }
     
    
@@ -273,16 +269,16 @@ SQL;
             //Server settings
             $mail->SMTPDebug = 2;                                 // Enable verbose debug output
             $mail->isSMTP();                                      // Set mailer to use SMTP
-            $mail->Host = 'portal.qwords.com';  // Specify main and backup SMTP servers
+            $mail->Host = 'privatens.id';  // Specify main and backup SMTP servers
             $mail->SMTPAuth = true;                               // Enable SMTP authentication
-            $mail->Username = 'notif@portal.qwords.com';                 // SMTP username
-            $mail->Password = 'masukah123!@#';                           // SMTP password
+            $mail->Username = 'YOUR USERNAME';                 // SMTP username
+            $mail->Password = 'YOUR PASSWORD';                           // SMTP password
             $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
             $mail->Port = 587;                                    // TCP port to connect to
         
             //Recipients
-            $mail->setFrom('notif@portal.qwords.com', 'Document Manager');
-            $mail->addAddress('billing@qwords.com', 'Billing');     // Add a recipient
+            $mail->setFrom('notif@privatens.id', 'Document Manager');
+            $mail->addAddress('billing@privatens.id', 'Billing');     // Add a recipient
            
         
             //Content
@@ -302,6 +298,7 @@ SQL;
         
         
     }
+	
     private function _document_client($vars)
     {
         
@@ -311,12 +308,12 @@ SQL;
         }else{
             $add_search = '';
         }
-        
+        $this->validate_input($user);
         
         $sql ="SELECT count(b.id) as jumlah, t.id, firstname, email, companyname, phonenumber FROM tblclients t inner join mod_box  b on t.id=b.idwhmcs ".$add_search." GROUP BY t.id";
         
       
-        $db_data = $this->query($sql);
+        $db_data = mysql_query($sql);
         include 'views/page_admin.php';
 
     }
@@ -328,19 +325,19 @@ SQL;
                                         WHERE syarat LIKE '%:"0"%' or syarat LIKE '%:0%'
 SQL;
 
-        $data_approval = $this->query($sql);
-        if($data_approval->num_rows==0){
+        $data_approval = mysql_query($sql);
+        if(mysql_num_rows($data_approval)==0){
             echo "<br> - No Data Need Arppoval";
         }else{
             $table = array();
-            while($data = $data_approval->fetchObject()){
+            while($data = mysql_fetch_object($data_approval)){
                 if($data->syarat!=null){
                     $_syarat = json_decode($data->syarat,true);
                    
                     $keys = array_keys($_syarat);
                   
                  
-                    $count = array();
+                    $count = null;
                     foreach($keys as $key){
                         if($_syarat[$key]['status']==0){
                             $count[]=1;
@@ -372,6 +369,7 @@ SQL;
         
         $page = @$_GET['page']; 
         $do   = @$_GET['upload'];
+        $uid =  $_SESSION['uid'];
         
         if($page =='null'){
             return  $this->_client_home($vars);     
@@ -380,14 +378,14 @@ SQL;
             return $this->_upload_gambar($vars);
         }
         elseif($page=='remove'){
-            $this->_remove_file($_GET['file']);
+            $this->_remove_file($_GET['file'],$uid);
             return $this->_client_home($vars);
         }
         elseif($page=='requirement'){
-            return $this->_requirement_page($vars);
+            return $this->_requirement_page($var);
         }
         elseif($page=='set_doc'){
-           $msg = $this->_set_document($vars);
+           $msg = $this->_set_document($vars,$uid);
            return  $this->_client_home($vars,$msg);
         }
         
@@ -399,7 +397,7 @@ SQL;
         
         $userid = $_GET ['userid'];
         
-        $query = $this->query("SELECT * FROM mod_box where idwhmcs = '$userid'");
+        $query = mysql_query("SELECT * FROM mod_box where idwhmcs = '$userid'");
         
         include 'views/document_client.php';
         
@@ -426,10 +424,10 @@ SQL;
         $_document = null;
         foreach($client_domains as $domain){
             
-            $query = $this->query("select * from privatensdocument where domain='$domain'");
-            if($query->num_rows!=0){
+            $query = mysql_query("select * from privatensdocument where domain='$domain'");
+            if(mysql_num_rows($query)!=0){
               
-                $detail = $query->fetchObject();
+                $detail = mysql_fetch_object($query);
                
                 $_syarat = json_decode($detail->syarat);
               
@@ -497,27 +495,31 @@ SQL;
             $add_query .=" or RIGHT(domain,".strlen($tld).")='$tld'";
             
         }
-        $query = $this->query("SELECT * FROM tbldomains WHERE userid='$idwhmcs' and (RIGHT(domain,2)='id' ".$add_query.")");
+        $query = mysql_query("SELECT * FROM tbldomains WHERE userid='$idwhmcs' and (RIGHT(domain,2)='id' ".$add_query.")");
         $data = null;
-        while($row = $query->fetchObject()){
+        while($row = mysql_fetch_object($query)){
             $data[]=$row->domain;
         }
         return (object)$data ;
     }
-    private function _remove_file($file){
-        $query = $this->query("delete from mod_box where file = '$file'");
+    private function _remove_file($file,$uid){
+        $querycheck = mysql_query("SELECT id from mod_box where file = '$file' AND idwhmcs = '$uid'");
+        if (mysql_num_rows($querycheck)>0)
+        {
+        $query = mysql_query("delete from mod_box where file = '$file' AND idwhmcs = '$uid'");
         unlink(self::$dir.$file);
-        $fopen = fopen(self::$dir.'remove.txt',"w+");
+        $fopen = fopen($dir.'remove.txt',"w+");
         fwrite($fopen,"delete form mod_box where file = $file");
+        }
     }
     private function _list_file($uid){
         if($uid==null){
             header("location:https://".$_SERVER["SERVER_NAME"]."");
             die;
         }
-        $query = $this->query("SELECT * FROM mod_box where idwhmcs = $uid");
+        $query = mysql_query("SELECT * FROM mod_box where idwhmcs = $uid");
         $data = null;
-        while($row = $query->fetchObject()){
+        while($row = mysql_fetch_object($query)){
             $data []= $row;
         }
         return (object)$data;
@@ -525,14 +527,15 @@ SQL;
     private function _upload_gambar($vars){
         $rename = uniqid().$this->_rename($_FILES['file']['name']);
         move_uploaded_file($_FILES['file']['tmp_name'], self::$dir.$rename);
-        $fopen = fopen(self::$dir.'t.txt',"w+");
-        fwrite($fopen,$this->_save_image($_FILES['file'],$rename,$vars));
+        $fopen = fopen($dir.'t.txt',"w+");
+        fwrite($fopen,$this->_save_image($_FILES['file'],$rename));
     }
     private function _rename($file){
         
         $name = explode(".", $file);
         $ext = $name[count($name)-1];
         return uniqid().".".$ext;
+        
     }
     private function _save_image($file,$rename,$vars){
         $data = [
@@ -549,7 +552,7 @@ SQL;
         foreach ($values as $val){
             $q.="'".$val."',";
         }
-        $query = $this->query("INSERT into mod_box ($field) values (".substr($q,0,strlen($q)-1).")");
+        $query = mysql_query("INSERT into mod_box ($field) values (".substr($q,0,strlen($q)-1).")");
         return  ("INSERT into mod_box ($field) values ($q)");
     }
     private function _read_metadata($file){
@@ -557,11 +560,11 @@ SQL;
         return json_encode($exif);
     }
     private function _get_user($uid){
-       $query = $this->query("SELECT * From tblclients where id = $uid");
-       return $query->fetchObject();
+       $query = mysql_query("SELECT * From tblclients where id = $uid");
+       return mysql_fetch_object($query);
     }
     
-    private function _set_document($vars){
+    private function _set_document($vars,$uid){
         
         $oauth2 = [
             "grant_type" => "client_credentials",
@@ -577,9 +580,9 @@ SQL;
             "file"                 => "https://".$_SERVER['SERVER_NAME']."/modules/addons/privatensdocument/files/".$_POST['file'],
             "domain"               => $_POST['domain']
         ];
-        
+        $this->validate_input($_POST['domain']);
 
-        $auth = $this->_authentication($vars['apiurl'],$oauth2);
+        $auth = $this->_authentication($oauth2);
 
         $set_all = ($_POST['set_all']=='on') ? 1 : 0;
       
@@ -590,10 +593,10 @@ SQL;
             'file_meta' => $this->_meta_document($_POST['file'],$_POST['domain'],$_POST['type']),
         ];
        
-       
+       $this->validate_input($_POST['domain']);
         $domain = $data['domain'];
        
-        $check_record = $this->query("SELECT domain from privatensdocument where domain='$domain'");
+        $check_record = mysql_query("SELECT domain from privatensdocument where domain='$domain' AND idwhmcs = '$uid'");
        
         
         if($check_record->num_rows==0){
@@ -613,21 +616,21 @@ SQL;
             $idwhmcs       = $this->_get_userid($domain);
             
             
-            $update_setall = $this->query("update mod_box set set_all='$set_all', type = '".$_POST['type']."' where file = '$file'");
-            $update_setall = $this->query("update mod_box set set_all='0' where file != '$file' and  type = '".$_POST['type']."' and idwhmcs ='$idwhmcs'");
+            $update_setall = mysql_query("update mod_box set set_all='$set_all', type = '".$_POST['type']."' where file = '$file'");
+            $update_setall = mysql_query("update mod_box set set_all='0' where file != '$file' and  type = '".$_POST['type']."' and idwhmcs ='$idwhmcs'");
             
             // Update all value document for some type
             $update = $this->_update_all_domain_syarat($_POST['domain'],$_POST['type'],$_POST['file']);
           
         }
       
-        $this->sendEmail($domain);
+        /*$this->sendEmail($domain);*/
         return "Success set your document";
     }
     private function _get_userid($domain){
-        $query = $this->query("SELECT * from tbldomains where domain='$domain'");
-        if($query->num_rows!=0){
-            $data = $query->fetchObject();
+        $query = mysql_query("SELECT * from tbldomains where domain='$domain'");
+        if(mysql_num_rows($query)!=0){
+            $data = mysql_fetch_object($query);
             return $data->userid;
         }
     }
@@ -637,18 +640,19 @@ SQL;
          * identified with type of document 
         */
         $idwhmcs = $this->_get_userid($domain);
-      
-        $query = $this->query("SELECT * from privatensdocument where domain = '$domain'");
+        $this->validate_input($idwhmcs);
+        
+        $query = mysql_query("SELECT * from privatensdocument where domain = '$domain'");
      
-        if($query->num_rows!=0){
+        if(mysql_num_rows($query)!=0){
             // update all documen form 1 user and many domain
-            $record        = $query->fetchObject();
+            $record        = mysql_fetch_object($query);
           
             $syarat        = json_decode($record->syarat,true);
             $syarat[$type] = ["file"=>$file,"status"=>0,"ket"=>'Replace by user doing set all'];
             
             $field_syarat  = json_encode($syarat);
-            $query         = $this->query("update privatensdocument set syarat = '$field_syarat' where domain='$domain'");
+            $query         = mysql_query("update privatensdocument set syarat = '$field_syarat' where domain='$domain'");
             /** 
              * So if the user have many domain but never set idcard , it will be automatic insert to the privatensdocument table from tbldomains tble with default value of syarat and status = 0 mean to pending
             */
@@ -663,12 +667,12 @@ SQL;
             $add_query .=" or RIGHT(domain,".strlen($tld).")='$tld'";
             
         }
-        $query =$this->query("SELECT domain from tbldomains where userid = '$idwhmcs' and  (RIGHT(domain,2)='id' ".$add_query.")");
+        $query =mysql_query("SELECT domain from tbldomains where userid = '$idwhmcs' and  (RIGHT(domain,2)='id' ".$add_query.")");
        
        
-        if($query->num_rows!=0){
+        if(mysql_num_rows($query)!=0){
             $insert=array();
-            while($row = $query->fetchObject()){
+            while($row = mysql_fetch_object($query)){
                    $data = [
                         'domain'    => $row->domain,
                         'syarat'    => $this->_syarat_domain($file,$row->domain,$type),
@@ -676,8 +680,8 @@ SQL;
                    ];
                     
                     // Jika ada di table domain dan  ada di table privatensdocument 
-                   $check_avail  = $this->query("SELECT domain from privatensdocument where domain ='$row->domain'");
-                   if($check_avail->num_rows!=0){
+                   $check_avail  = mysql_query("SELECT domain from privatensdocument where domain ='$row->domain'");
+                   if(mysql_num_rows($check_avail)!=0){
                        $this->_update_privatensdocument($data);
                    } else{
                        $insert [] = $this->_insert_privatensdocument($data);
@@ -696,7 +700,7 @@ SQL;
             $q .= $fields[$i]."='".$values[$i]."',";
         }
         $sql = "UPDATE privatensdocument set ".substr($q,0,strlen($q)-1)." where domain = '".$data['domain']."'";
-        $this->query($sql);
+        mysql_query($sql);
 
     }
     private function _insert_privatensdocument($data){
@@ -708,12 +712,12 @@ SQL;
         }
         $q_values = substr($q,0,strlen($q)-1);
         $sql = "INSERT into privatensdocument ($fields) values ($q_values)";
-        $insert = $this->query($sql);
+        $insert = mysql_query($sql);
     }
     private function _meta_document($file,$domain,$type){
        
-        $query = $this->query("SELECT * From mod_box where file ='$file'");
-        $rec_meta = $query->fetchObject();
+        $query = mysql_query("SELECT * From mod_box where file ='$file'");
+        $rec_meta = mysql_fetch_object($query);
         
         // define new meta 
         $meta =[
@@ -726,11 +730,11 @@ SQL;
         ];
         // check meta in mod_id 
        
-        $chek_doc= $this->query("SELECT * from privatensdocument where domain='$domain'");
-        if($chek_doc->num_rows==0){
+        $chek_doc= mysql_query("SELECT * from privatensdocument where domain='$domain'");
+        if(mysql_num_rows($chek_doc)==0){
             $record = null ;
         }else{
-            $record = $chek_doc->fetchObject();
+            $record = mysql_fetch_object($chek_doc);
         }
         
         if($record ==null){
@@ -765,11 +769,11 @@ SQL;
         ];
         //  First read the privatensdocument and check is domain have any data before...
        
-        $chek_doc= $this->query("SELECT * from privatensdocument where domain='$domain'");
-        if($chek_doc->num_rows==0){
+        $chek_doc= mysql_query("SELECT * from privatensdocument where domain='$domain'");
+        if(mysql_num_rows($chek_doc)==0){
             $record = null ;
         }else{
-            $record = $chek_doc->fetchObject();
+            $record = mysql_fetch_object($chek_doc);
         }
         
         if($record == null) {
@@ -791,13 +795,26 @@ SQL;
         }
     }
     private function _detail_document($file){
-        $query = $this->query("SELECT * from mod_box where file='$file'");
-        return $data = $query->fetchObject();
+        $query = mysql_query("SELECT * from mod_box where file='$file'");
+        return $data = mysql_fetch_object($query);
+    }
+    
+    private function validate_input($param){
+        if (strpos($param," ") > 0) {
+      	    echo "eitsss,,,";
+            die();
+        }
     }
     
     // get preview domain document 
     public function domain_document(){
         $domain  = $_POST['domain'];
+        $csrf  = $_POST['token'];
+        if ($csrf != $_SESSION['csrftoken'] || $csrf == '')
+        {
+            die('ooops');
+        }
+        $this->validate_input($domain);
  
        $sql = <<<SQL
        SELECT m.*,d.userid,u.firstname,u.email  FROM privatensdocument m 
@@ -806,8 +823,10 @@ SQL;
                                         WHERE syarat LIKE '%:"0"%' or syarat LIKE '%:0%' and d.domain = '$domain'
 SQL;
        
-        $query = $this->query($sql);
-        while($row = $query->fetchObject()){
+       
+    //   echo $sql;
+        $query = mysql_query($sql);
+        while($row = mysql_fetch_object($query)){
             
            $docs=json_decode($row->syarat,true);
         }
@@ -827,6 +846,19 @@ SQL;
     }
     
     function proccess_doc(){
+        $csrf  = $_POST['token'];
+        if ($csrf != $_SESSION['csrftoken'] || $csrf == '')
+        {
+            die('ooops');
+        }
+        /*
+        $queryuser  = mysql_query("SELECT id from tbladmins where id = '$id'");
+        $datauser   = mysql_num_rows($queryuser);
+        
+        if ($datauser == 0)
+        {
+            die('oops');
+        }*/
         
         $post= [
             'domain'=> $_POST['domain'],
@@ -834,10 +866,12 @@ SQL;
             'status'=> $_POST['status'], # approve =1 reject = 2
             'type'  => $_POST['key'] # type syarat yang diajukan
         ];
-       
-        $last_data = $this->query("SELECT syarat from privatensdocument where domain = '". $post['domain']."'");
         
-        $record = $last_data->fetchObject();
+        $this->validate_input($_POST['domain']);
+       
+        $last_data = mysql_query("SELECT syarat from privatensdocument where domain = '". $post['domain']."'");
+        
+        $record = mysql_fetch_object($last_data);
         
         $syarat = json_decode($record->syarat,true);
         
@@ -845,7 +879,7 @@ SQL;
         $update_keterangan = $syarat[$post['type']]['ket'] = $post['ket'];
        
         $_syarat = json_encode($syarat);
-        $update_sql = $this->query("update privatensdocument set syarat = '$_syarat' where domain = '". $post['domain']."'");
+        $update_sql = mysql_query("update privatensdocument set syarat = '$_syarat' where domain = '". $post['domain']."'");
         $reply = [
             'code'=> '1000',
             'msg' => 'Document status proccessed'
@@ -855,6 +889,22 @@ SQL;
     
     public function lookup_tld($doc=''){
         $domain = $_GET['domain'];
+        $csrf  = $_GET['token'];
+        $id = $_GET['id'];
+        if ($csrf != $_SESSION['csrftoken'] || $csrf == '')
+        {
+            die('ooops');
+        }
+        
+        $queryuser  = mysql_query("SELECT id from tbldomains where userid = '$id' AND domain = '$domain'");
+        $datauser   = mysql_num_rows($queryuser);
+        
+        if ($datauser == 0)
+        {
+            die('oops');
+        }
+        
+        $this->validate_input($domain);
         $syarat = $this->_syarat();
         $tld = $syarat[$this->_tld($domain)];
         foreach($tld as $row){
@@ -868,9 +918,25 @@ SQL;
          * this function is lookup for yaour domain document
         */
         $domain = $_GET['domain'];
+        $csrf  = $_GET['token'];
+        $id  = $_GET['id'];
+        if ($csrf != $_SESSION['csrftoken'] || $csrf == '')
+        {
+            die('ooops');
+        }
         
-        $query  = $this->query("SELECT * from privatensdocument where domain = '$domain'");
-        $data   = $query->fetchObject();
+        $this->validate_input($domain);
+        
+        $queryuser  = mysql_query("SELECT id from tbldomains where userid = '$id' AND domain = '$domain'");
+        $datauser   = mysql_num_rows($queryuser);
+        
+        if ($datauser == 0)
+        {
+            die('oops');
+        }
+        
+        $query  = mysql_query("SELECT * from privatensdocument where domain = '$domain'");
+        $data   = mysql_fetch_object($query);
         $_syarat = json_decode($data->syarat,true);
         $keys= array_keys($_syarat);
         $detail = null;

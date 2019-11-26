@@ -1,4 +1,4 @@
-<?php 
+<?php
     include 'moid.php';
     if(isset($_GET['do'])){
         $do = $_GET['do'];

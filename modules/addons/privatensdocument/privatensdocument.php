@@ -1,5 +1,5 @@
 <?php 
-
+if (!defined("WHMCS")) die("This file cannot be accessed directly");
 include 'moid.php';
 
 function privatensdocument_output($vars) {
@@ -9,7 +9,6 @@ function privatensdocument_output($vars) {
 
 }
 function privatensdocument_clientarea($vars) {
- 
     $m= new Moid;
     return $m->display_client($vars);
  
@@ -39,18 +38,18 @@ function privatensdocument_config() {
     $configarray = array(
     "name" => "PrivateNS Document",
     "description" => "This is new version of IDcard module",
-    "version" => "3.0",
+    "version" => "3.1",
     "author" => "Privatens",
     "fields" => array( 
             "email_privatens" => array (
                 "FriendlyName" => "Email",
                 "Type"         => "text", # Text Box
                 "Size"         => "255", # Defines the Field Width
-                "Description"  => "Email Login privatens",
+                "Description"  => "Email Login Irsfa",
                 "Default"      => "",
                 "Placeholder"  => "namaemail@domain.com"
             ),
-            "apiurl" => array (
+			"apiurl" => array (
                 "FriendlyName" => "API Url",
                 "Type"         => "text", # Text Box
                 "Size"         => "255", # Defines the Field Width

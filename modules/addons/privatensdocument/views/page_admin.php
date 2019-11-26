@@ -1,4 +1,3 @@
-
 <link rel="stylesheet" href="./modules/addons/privatensdocument/assets/source/css/jquery.dataTables.min.css">
 <div class="table-reponsive">
     <div class="col-md-12" style="padding-top:20px" >
@@ -9,7 +8,7 @@
     			<th> Detail </th>
     		</thead>
     		<tbody>
-    		    <?php while($row = $db_data->fetch_object()){ ?>
+    		    <?php while($row = mysql_fetch_object($db_data)){ ?>
     			<tr>
     				<td>
     				    <b> <i class="glyphicon glyphicon-user"></i> <?=$row->firstname;?> | <i class="glyphicon glyphicon-home"></i> <?=$row->companyname;?></b>
