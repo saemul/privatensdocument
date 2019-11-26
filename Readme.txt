@@ -1,4 +1,4 @@
-PrivateNS Document WHMCS Module v3.0
+PrivateNS Document WHMCS Module v3.1
 
 1. Upload zip into your WHMCS installation folder
 2. Extract zip
