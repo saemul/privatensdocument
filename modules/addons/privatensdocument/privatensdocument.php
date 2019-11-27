@@ -15,22 +15,20 @@ function privatensdocument_clientarea($vars) {
 }
 //  This Function Outside Class
 function privatensdocument_activate() {
-    $idcard = new Moid;
     # Create Custom DB Table
     $create_box    = "CREATE table mod_box (id varchar(100), idwhmcs varchar(100), comid varchar(100),type varchar(20),file text, meta text)";
     $create_idcard = "CREATE table privatensdocument (domain varchar(200),syarat text,file_meta text)";
-    $query = $idcard->query($create_box);
-    $query = $idcard->query($create_idcard);
+    $query = mysql_query($create_box);
+    $query = mysql_query($create_idcard);
     # Return Result
     return array('status'=>'success','description'=>'Success Building module.. ');
 }
-function privatensdocument_deactive() {
-    $idcard = new Moid;
+function privatensdocument_deactivate() {
     # Create Custom DB Table
     $create_box    = "DROP TABLE mod_box";
     $create_idcard = "DROP TABLE privatensdocument";
-    $query = $idcard->query($create_box);
-    $query = $idcard->query($create_idcard);
+    $query = mysql_query($create_box);
+    $query = mysql_query($create_idcard);
     # Return Result
     return array('status'=>'success','description'=>'All Your "privatensdocument" data has been remove ');
 }
