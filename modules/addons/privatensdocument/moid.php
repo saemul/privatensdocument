@@ -24,7 +24,7 @@ class Moid
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-        CURLOPT_URL => $url."/oauth/token"
+        CURLOPT_URL => $url."/oauth/token",
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,
